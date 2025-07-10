@@ -1,4 +1,6 @@
+// import React, { useState, useRef, useEffect } from 'react';
 import React, { useState, useRef, useEffect } from 'react';
+
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import DeployButton from './DeployButton';
 import ChatHistory from './ChatHistory';
@@ -53,12 +55,33 @@ const CodeGenerator: React.FC<CodeGeneratorProps> = ({ onClose }) => {
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
-  
+  // const bottomRef = useRef<HTMLDivElement>(null);
+const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+const PEXELS_API_KEY = "XvWmsM8koeEX2GHcetS2lCjkzM4O7QPuJ65KVuVj9PkOBOjC3W5EeXpK";
+
+const fetchPexelsImage = async (query) => {
+  try {
+    const res = await fetch(`https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=1`, {
+      headers: {
+        Authorization: PEXELS_API_KEY
+      }
+    });
+    const data = await res.json();
+    if (data.photos && data.photos.length > 0) {
+      return data.photos[0].src.large;
+    }
+  } catch (err) {
+    console.error("Error fetching Pexels image:", err);
+  }
+  return "https://images.pexels.com/photos/53435/tree-oak-landscape-view-53435.jpeg?cs=srgb&dl=pexels-pixabay-53435.jpg&fm=jpg"; // fallback
+};
+
   // Load chat sessions from localStorage on component mount
   useEffect(() => {
     const savedSessions = localStorage.getItem('chatSessions');
     if (savedSessions) {
-      try {
+      try { 
         const sessions = JSON.parse(savedSessions).map((session: any) => ({
           ...session,
           timestamp: new Date(session.timestamp)
@@ -77,32 +100,42 @@ const CodeGenerator: React.FC<CodeGeneratorProps> = ({ onClose }) => {
     }
   }, [chatSessions]);
 
-  const generateCode = async () => {
-    if (!prompt.trim()) return;
+//   useEffect(() => {
+//   if (isStreaming && bottomRef.current) {
+//     bottomRef.current.scrollIntoView({ behavior: "smooth" });
+//   }
+// }, [streamingText]);
 
-    // Clear previous response and save current prompt to history
-    setStreamingText('');
-    setGeneratedCode({ html: '', css: '', js: '' });
-    setShowPreview(false);
+useEffect(() => {
+  if (isStreaming && scrollContainerRef.current) {
+    scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
+  }
+}, [streamingText]);
 
-    // Check if API key is available
-    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-    if (!apiKey || apiKey === 'your_api_key_here') {
-      setError('Please add your Google Generative AI API key to the .env file. Get one from: https://makersuite.google.com/app/apikey');
-      return;
-    }
+const generateCode = async () => {
+  if (!prompt.trim()) return;
 
-    setIsGenerating(true);
-    setError('');
-    setStreamingText('');
-    setIsStreaming(true);
+  setStreamingText('');
+  setGeneratedCode({ html: '', css: '', js: '' });
+  setShowPreview(false);
 
-    try {
-      // Initialize Gemini AI with environment variable
-      const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+  if (!apiKey) {
+    setError('Please add your Google Generative AI API key to the .env file.');
+    return;
+  }
 
-      const systemPrompt = `You are an expert web developer. Generate clean, modern, and functional HTML, CSS, and JavaScript code based on the user's request.
+  setIsGenerating(true);
+  setError('');
+  setIsStreaming(true);
+
+  try {
+    const imageURL = await fetchPexelsImage(prompt);
+
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+
+    const systemPrompt = `You are an expert web developer. Generate clean, modern, and functional HTML, CSS, and JavaScript code based on the user's request.
 
 Rules:
 1. Always provide complete, working code
@@ -112,6 +145,9 @@ Rules:
 5. Add interactive JavaScript when appropriate
 6. Use modern ES6+ JavaScript syntax
 7. Ensure cross-browser compatibility
+8. Use only the following image in your output: ${imageURL}
+9. Only use standard Font Awesome CDN. Do NOT generate or repeat integrity values manually.
+
 
 Format your response EXACTLY like this:
 HTML:
@@ -131,83 +167,94 @@ JavaScript:
 
 User Request: ${prompt}`;
 
-      // Use streaming for live response
-      const result = await model.generateContentStream(systemPrompt);
-      let fullText = '';
-      
-      for await (const chunk of result.stream) {
-        const chunkText = chunk.text();
-        fullText += chunkText;
-        setStreamingText(fullText);
-      }
-      
-      setIsStreaming(false);
-
-      // Parse the response to extract HTML, CSS, and JS
-      const htmlMatch = fullText.match(/HTML:\s*```html\s*([\s\S]*?)\s*```/i);
-      const cssMatch = fullText.match(/CSS:\s*```css\s*([\s\S]*?)\s*```/i);
-      const jsMatch = fullText.match(/JavaScript:\s*```javascript\s*([\s\S]*?)\s*```/i);
-
-      const code: GeneratedCode = {
-        html: htmlMatch ? htmlMatch[1].trim() : '',
-        css: cssMatch ? cssMatch[1].trim() : '',
-        js: jsMatch ? jsMatch[1].trim() : ''
-      };
-
-      setGeneratedCode(code);
-      
-      // Save to chat history
-      const newSession: ChatSession = {
-        id: Date.now().toString(),
-        title: prompt.slice(0, 50) + (prompt.length > 50 ? '...' : ''),
-        timestamp: new Date(),
-        prompt,
-        generatedCode: code
-      };
-      
-      setChatSessions(prev => [newSession, ...prev]);
-      setCurrentSessionId(newSession.id);
-      setShowPreview(true);
-      
-      // Clear the prompt after successful generation
-      setPrompt('');
-    } catch (err) {
-      setError('Failed to generate code. Please try again.');
-      console.error('Error generating code:', err);
-    } finally {
-      setIsGenerating(false);
-      setIsStreaming(false);
+    const result = await model.generateContentStream(systemPrompt);
+    let fullText = '';
+    for await (const chunk of result.stream) {
+      const chunkText = chunk.text();
+      fullText += chunkText;
+      setStreamingText(fullText);
     }
-  };
 
-  const updatePreview = () => {
-    if (!iframeRef.current) return;
+    setIsStreaming(false);
 
-    const { html, css, js } = generatedCode;
-    const fullHTML = `
-      <!DOCTYPE html>
-      <html lang="en">
-      <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Generated Website</title>
-        <style>
-          ${css}
-        </style>
-      </head>
-      <body>
-        ${html}
-        <script>
-          ${js}
-        </script>
-      </body>
-      </html>
-    `;
+    const htmlMatch = fullText.match(/HTML:\s*```html\s*([\s\S]*?)\s*```/i);
+    const cssMatch = fullText.match(/CSS:\s*```css\s*([\s\S]*?)\s*```/i);
+    const jsMatch = fullText.match(/JavaScript:\s*```javascript\s*([\s\S]*?)\s*```/i);
 
-    const blob = new Blob([fullHTML], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    iframeRef.current.src = url;
-  };
+    const code = {
+      html: htmlMatch ? htmlMatch[1].trim() : '',
+      css: cssMatch ? cssMatch[1].trim() : '',
+      js: jsMatch ? jsMatch[1].trim() : ''
+    };
+
+    setGeneratedCode(code);
+
+    const newSession = {
+      id: Date.now().toString(),
+      title: prompt.slice(0, 50) + (prompt.length > 50 ? '...' : ''),
+      timestamp: new Date(),
+      prompt,
+      generatedCode: code
+    };
+
+    setChatSessions(prev => [newSession, ...prev]);
+    setCurrentSessionId(newSession.id);
+    setShowPreview(true);
+    setPrompt('');
+
+  } catch (err) {
+    setError('Failed to generate code. Please try again.');
+    console.error('Error generating code:', err);
+  } finally {
+    setIsGenerating(false);
+    setIsStreaming(false);
+  }
+};
+
+
+const updatePreview = () => {
+  if (!iframeRef.current) return;
+
+  const { html, css, js } = generatedCode;
+
+  // Replace broken or relative image URLs with a fallback image
+  const safeHtml = html.replace(
+    /<img\s+[^>]*src="([^"]+)"[^>]*>/g,
+    (match, src) => {
+      // If src is not a full URL, replace it
+      if (!src.startsWith('http')) {
+        const fallback = 'https://images.pexels.com/photos/53435/tree-oak-landscape-view-53435.jpeg?cs=srgb&dl=pexels-pixabay-53435.jpg&fm=jpg';
+        return match.replace(src, fallback);
+      }
+      return match;
+    }
+  );
+
+  const fullHTML = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Generated Website</title>
+      <style>
+        ${css}
+      </style>
+    </head>
+    <body>
+      ${safeHtml}
+      <script>
+        ${js}
+      </script>
+    </body>
+    </html>
+  `;
+
+  const blob = new Blob([fullHTML], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  iframeRef.current.src = url;
+};
+
 
   useEffect(() => {
     if (generatedCode.html && showPreview) {
@@ -401,21 +448,28 @@ ${js}
 
         {/* Live AI Response */}
         {(isStreaming || streamingText) && (
-          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/10 mb-8">
-            <div className="flex items-center mb-4">
-              <div className="flex items-center space-x-2">
-                <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
-                <span className="text-white font-semibold">AI is generating your code...</span>
-              </div>
-            </div>
-            <div className="bg-black/20 rounded-lg p-4 max-h-64 overflow-auto">
-              <pre className="text-sm text-green-400 whitespace-pre-wrap font-mono">
-                {streamingText}
-                {isStreaming && <span className="animate-pulse">|</span>}
-              </pre>
-            </div>
-          </div>
-        )}
+  <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/10 mb-8">
+    <div className="flex items-center mb-4">
+      <div className="flex items-center space-x-2">
+        <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+        <span className="text-white font-semibold">
+          AI is generating your code...
+        </span>
+      </div>
+    </div>
+
+    {/* ★ Scrollable container ★ */}
+    <div
+      ref={scrollContainerRef}
+      className="bg-black/20 rounded-lg p-4 max-h-64 overflow-auto"
+    >
+      <pre className="text-sm text-green-400 whitespace-pre-wrap font-mono">
+        {streamingText}
+        {isStreaming && <span className="animate-pulse">|</span>}
+      </pre>
+    </div>
+  </div>
+)}
 
         {/* Generated Code and Preview */}
         {generatedCode.html && (
