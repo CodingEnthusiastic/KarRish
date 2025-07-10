@@ -89,11 +89,19 @@ const fetchPexelsImage = async (query: string): Promise<string> => {
     const savedSessions = localStorage.getItem('chatSessions');
     if (savedSessions) {
       try { 
-        const sessions = JSON.parse(savedSessions).map((session: any) => ({
-          ...session,
-          timestamp: new Date(session.timestamp)
-        }));
-        setChatSessions(sessions.slice(0, 10)); // Keep only last 10 sessions
+        // const sessions = JSON.parse(savedSessions).map((session: any) => ({
+        //   ...session,
+        //   timestamp: new Date(session.timestamp)
+        // }));
+        const parsed = JSON.parse(savedSessions);
+        if (Array.isArray(parsed) && parsed.every(s => s.id && s.generatedCode)) {
+          const sessions = parsed.map((session: any) => ({
+            ...session,
+            timestamp: new Date(session.timestamp)
+          }));
+          setChatSessions(sessions.slice(0, 10));
+        }
+        // setChatSessions(sessions.slice(0, 10)); // Keep only last 10 sessions
       } catch (error) {
         console.error('Error loading chat sessions:', error);
       }
@@ -187,11 +195,27 @@ User Request: ${prompt}`;
 
     const result = await model.generateContentStream(systemPrompt);
     let fullText = '';
-    for await (const chunk of result.stream) {
-      const chunkText = chunk.text();
-      fullText += chunkText;
-      setStreamingText(fullText);
+    // for await (const chunk of result.stream) {
+    //   const chunkText = chunk.text();
+    //   fullText += chunkText;
+    //   setStreamingText(fullText);
+    // }
+    let isMounted = true;
+try {
+  const result = await model.generateContentStream(systemPrompt);
+  for await (const chunk of result.stream) {
+        if (!isMounted) return;
+        const chunkText = chunk.text();
+        fullText += chunkText;
+        setStreamingText(fullText);
+      }
+    } finally {
+      if (isMounted) {
+        setIsGenerating(false);
+        setIsStreaming(false);
+      }
     }
+
 
     setIsStreaming(false);
 
@@ -285,8 +309,13 @@ const updatePreview = () => {
     }
   }, [generatedCode, showPreview, isFullscreen]);
 
-  const copyToClipboard = (code: string) => {
-    navigator.clipboard.writeText(code);
+  const copyToClipboard = async (code: string) => {
+    try {
+      await navigator.clipboard.writeText(code);
+    } catch (err) {
+      console.error("Failed to copy code:", err);
+      alert("Copy failed. Please copy manually.");
+    }
   };
 
   const downloadCode = () => {
@@ -316,25 +345,30 @@ ${js}
     a.href = url;
     a.download = 'generated-website.html';
     a.click();
-    URL.revokeObjectURL(url);
+    // URL.revokeObjectURL(url);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+
   };
 
-    const loadChatSession = (session: ChatSession) => {
-    setPrompt('');
-    setGeneratedCode(session.generatedCode);
-    setCurrentSessionId(session.id);
-    setStreamingText('');
-    setError('');
+  const loadChatSession = (session: ChatSession) => {
+  setPrompt('');
+  setGeneratedCode(session.generatedCode);
+  setCurrentSessionId(session.id);
+  setStreamingText('');
+  setError('');
 
-    setShowPreview(true);
-    setShowChatHistory(false); // 👈 hides the chat history panel
-    setNeedsPreviewUpdate(true);
+  setShowPreview(true);
+  setShowChatHistory(false);
+  setNeedsPreviewUpdate(true);
 
-    // Scroll into view after a short delay to ensure rendering is done
-    setTimeout(() => {
-      generatedSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, 300);
-  };
+  // Safely scroll to generated section after a short delay
+  setTimeout(() => {
+    const section = generatedSectionRef.current;
+    if (section) {
+      section.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, 300);
+};
 
 
   const deleteChatSession = (sessionId: string) => {
