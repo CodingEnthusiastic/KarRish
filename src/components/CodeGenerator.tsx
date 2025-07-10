@@ -41,11 +41,12 @@ interface CodeGeneratorProps {
   onClose: () => void;
 }
 
+
 const CodeGenerator: React.FC<CodeGeneratorProps> = ({ onClose }) => {
   const [prompt, setPrompt] = useState('');
   const [generatedCode, setGeneratedCode] = useState<GeneratedCode>({ html: '', css: '', js: '' });
   const [isGenerating, setIsGenerating] = useState(false);
-  const [showPreview, setShowPreview] = useState(false);
+  const [showPreview, setShowPreview] = useState(true);
   const [activeTab, setActiveTab] = useState<'html' | 'css' | 'js'>('html');
   const [error, setError] = useState('');
   const [streamingText, setStreamingText] = useState('');
@@ -54,13 +55,20 @@ const CodeGenerator: React.FC<CodeGeneratorProps> = ({ onClose }) => {
   const [showChatHistory, setShowChatHistory] = useState(false);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [needsPreviewUpdate, setNeedsPreviewUpdate] = useState(false); // ✅ NEW
+
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  // const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // const [showPreview, setShowPreview] = useState(true);
+
   // const bottomRef = useRef<HTMLDivElement>(null);
 const scrollContainerRef = useRef<HTMLDivElement>(null);
+const generatedSectionRef = useRef<HTMLDivElement>(null);
+
 
 const PEXELS_API_KEY = "XvWmsM8koeEX2GHcetS2lCjkzM4O7QPuJ65KVuVj9PkOBOjC3W5EeXpK";
-
-const fetchPexelsImage = async (query) => {
+const fetchPexelsImage = async (query: string): Promise<string> => {
   try {
     const res = await fetch(`https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=1`, {
       headers: {
@@ -76,7 +84,6 @@ const fetchPexelsImage = async (query) => {
   }
   return "https://images.pexels.com/photos/53435/tree-oak-landscape-view-53435.jpeg?cs=srgb&dl=pexels-pixabay-53435.jpg&fm=jpg"; // fallback
 };
-
   // Load chat sessions from localStorage on component mount
   useEffect(() => {
     const savedSessions = localStorage.getItem('chatSessions');
@@ -99,7 +106,18 @@ const fetchPexelsImage = async (query) => {
       localStorage.setItem('chatSessions', JSON.stringify(chatSessions.slice(0, 10)));
     }
   }, [chatSessions]);
-
+useEffect(() => {
+  if (needsPreviewUpdate && showPreview && iframeRef.current) {
+    updatePreview();
+    setNeedsPreviewUpdate(false);
+  }
+}, [needsPreviewUpdate, showPreview, generatedCode]);
+// useEffect(() => {
+//   if (needsPreviewUpdate && showPreview && iframeRef.current) {
+//     updatePreview();
+//     setPendingPreviewUpdate(false);
+//   }
+// }, [pendingPreviewUpdate, showPreview, iframeRef.current]);
 //   useEffect(() => {
 //   if (isStreaming && bottomRef.current) {
 //     bottomRef.current.scrollIntoView({ behavior: "smooth" });
@@ -117,7 +135,7 @@ const generateCode = async () => {
 
   setStreamingText('');
   setGeneratedCode({ html: '', css: '', js: '' });
-  setShowPreview(false);
+  setShowPreview(true);
 
   const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
   if (!apiKey) {
@@ -200,6 +218,7 @@ User Request: ${prompt}`;
     setChatSessions(prev => [newSession, ...prev]);
     setCurrentSessionId(newSession.id);
     setShowPreview(true);
+    setNeedsPreviewUpdate(true);
     setPrompt('');
 
   } catch (err) {
@@ -208,6 +227,7 @@ User Request: ${prompt}`;
   } finally {
     setIsGenerating(false);
     setIsStreaming(false);
+    setShowPreview(true);
   }
 };
 
@@ -298,29 +318,32 @@ ${js}
     a.click();
     URL.revokeObjectURL(url);
   };
-  
-  const loadChatSession = (session: ChatSession) => {
+
+    const loadChatSession = (session: ChatSession) => {
     setPrompt('');
     setGeneratedCode(session.generatedCode);
     setCurrentSessionId(session.id);
-    setShowPreview(true);
-    setShowChatHistory(false);
     setStreamingText('');
     setError('');
-    
-    // Auto-update preview when loading from history
+
+    setShowPreview(true);
+    setShowChatHistory(false); // 👈 hides the chat history panel
+    setNeedsPreviewUpdate(true);
+
+    // Scroll into view after a short delay to ensure rendering is done
     setTimeout(() => {
-      updatePreview();
-    }, 100);
+      generatedSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, 300);
   };
-  
+
+
   const deleteChatSession = (sessionId: string) => {
     setChatSessions(prev => prev.filter(session => session.id !== sessionId));
     if (currentSessionId === sessionId) {
       setCurrentSessionId(null);
       setGeneratedCode({ html: '', css: '', js: '' });
       setPrompt('');
-      setShowPreview(false);
+      setShowPreview(true);
     }
   };
 
@@ -365,7 +388,11 @@ ${js}
           
           <div className="flex items-center space-x-4">
             <button
-              onClick={() => setShowChatHistory(!showChatHistory)}
+              // onClick={() => setShowChatHistory(!showChatHistory)}
+              onClick={() => setShowChatHistory(prev => {
+                // If currently hidden, show it. If shown, toggle off.
+                return !prev;
+              })}
               className="flex items-center space-x-2 bg-white/10 backdrop-blur-sm text-white px-4 py-2 rounded-xl hover:bg-white/20 transition-all duration-300"
             >
               <History className="w-5 h-5" />
@@ -470,10 +497,12 @@ ${js}
     </div>
   </div>
 )}
+        {/* const generatedSectionRef = useRef<HTMLDivElement>(null); */}
+
 
         {/* Generated Code and Preview */}
         {generatedCode.html && (
-          <div className="space-y-8">
+          <div ref={generatedSectionRef} className="space-y-8">
             {/* Fullscreen Preview Modal */}
             {isFullscreen && (
               <div className="fixed inset-0 z-50 bg-black flex flex-col">
@@ -581,7 +610,7 @@ ${js}
                   Live Preview
                 </h3>
                 <button
-                  onClick={() => setShowPreview(!showPreview)}
+                  onClick={() => setShowPreview(true)}
                   className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
                   title="Toggle preview"
                 >
