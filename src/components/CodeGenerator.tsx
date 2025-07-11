@@ -696,6 +696,9 @@ ${js}
   );
 };
 
-export default CodeGenerator as React.ForwardRefExoticComponent<
+const ForwardedCodeGenerator = CodeGenerator as React.ForwardRefExoticComponent<
   CodeGeneratorProps & React.RefAttributes<CodeGeneratorRef>
 >;
+
+export default ForwardedCodeGenerator;
+
