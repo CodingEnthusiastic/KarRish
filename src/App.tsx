@@ -150,33 +150,20 @@ function App() {
       image: "/screenshots/step1-describe.png",
       icon: <Timer className="w-8 h-8 text-white" />
     },
+    
     {
       id: 2,
-      title: "2. AI Creates Magic",
-      description: "Watch as our AI generates beautiful, professional website code tailored to your needs. HTML, CSS, and JavaScript created in seconds.",
-      image: "/screenshots/step2-ai-creates.png",
-      icon: <Sparkles className="w-8 h-8 text-white" />
-    },
-    {
-      id: 3,
-      title: "3. Live Preview & Edit",
+      title: "2. Live Preview & Edit",
       description: "See your website come to life instantly with our live preview. Make changes, test functionality, and perfect your design in real-time.",
       image: "/screenshots/step3-preview.png",
       icon: <Play className="w-8 h-8 text-white" />
     },
     {
-      id: 4,
-      title: "4. Deploy Instantly",
+      id: 3,
+      title: "3. Go Full Screen and Deploy Instantly",
       description: "Launch your website to the world with one click. Deploy to Netlify, Vercel, or download your files for any hosting platform.",
       image: "/screenshots/step4-deploy.png",
       icon: <Globe className="w-8 h-8 text-white" />
-    },
-    {
-      id: 5,
-      title: "5. Launch & Succeed",
-      description: "Your professional website is now live and ready to convert visitors into customers. Track performance and grow your business online.",
-      image: "/screenshots/step5-success.png",
-      icon: <Trophy className="w-8 h-8 text-white" />
     }
   ];
 
