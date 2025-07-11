@@ -367,6 +367,13 @@ function App() {
           <section
             id="how-it-works"
             className="py-20 px-4 sm:px-6 lg:px-8 flex justify-center"
+            style={{
+              height: 'auto',
+              ...(window.innerWidth >= 1024 && {
+                transform: 'scale(0.85)',
+                transformOrigin: 'top center',
+              }),
+            }}
           >
             <div className="w-full sm:w-[90%] lg:w-[75%] xl:w-[70%] max-w-screen-lg transition-all duration-300">
 
