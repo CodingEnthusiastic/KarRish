@@ -379,9 +379,14 @@ function App() {
               }),
             }}
           >
-            <div className="w-full sm:w-[90%] lg:w-[75%] xl:w-[70%] max-w-screen-lg transition-all duration-300">
-
-        
+{/*             <div className="w-full sm:w-[90%] lg:w-[75%] xl:w-[70%] max-w-screen-lg transition-all duration-300"> */}
+          <div
+            className={`w-full sm:w-[90%] lg:w-[75%] xl:w-[70%] max-w-screen-lg transition-all ${
+              window.innerWidth < 768 ? 'duration-[1000ms]' : 'duration-300'
+            }`}
+          >
+          
+                  
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
               From Idea to Website in
