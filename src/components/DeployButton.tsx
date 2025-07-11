@@ -40,14 +40,18 @@ ${generatedCode.html}
   const downloadAsZip = async () => {
     setIsDeploying(true);
     const files = generateFiles();
+
+    console.log(files);
     const zip = new JSZip();
 
     for (const [filename, content] of Object.entries(files)) {
       zip.file(filename, content);
     }
-
+    console.log(zip);
     const blob = await zip.generateAsync({ type: 'blob' });
+    console.log(blob);
     const url = URL.createObjectURL(blob);
+    console.log(url);
     const a = document.createElement('a');
     a.href = url;
     a.download = `${projectName}.zip`;
@@ -120,8 +124,18 @@ ${generatedCode.html}
         });
       }));
 
-      // ✅ Done
-      window.open(`https://${siteData.name}.netlify.app`, '_blank');
+      // // ✅ Done
+      // window.open(`https://${siteData.name}.netlify.app`, '_blank');
+      // ✅ Done — use the URL returned by the deploy API
+     // deployData contains ssl_url or deploy_ssl_url
+    const liveUrl = deployData.deploy_ssl_url || deployData.ssl_url;
+      console.log(liveUrl);
+     if (liveUrl) {
+       window.open(liveUrl, '_blank');
+     } else {
+       // fallback if not present
+       window.open(`https://${siteData.name}.netlify.app`, '_blank');
+     }
 
     } catch (err) {
       console.error('Deploy error:', err);
