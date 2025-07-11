@@ -1,5 +1,5 @@
 // import React, { useState, useRef, useEffect } from 'react';
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import DeployButton from './DeployButton';
@@ -41,8 +41,11 @@ interface CodeGeneratorProps {
   onClose: () => void;
 }
 
+export interface CodeGeneratorRef {
+  toggleHistory: () => void;
+}
 
-const CodeGenerator: React.FC<CodeGeneratorProps> = ({ onClose }) => {
+const CodeGenerator = forwardRef<CodeGeneratorRef, CodeGeneratorProps>(({ onClose }, ref) => {
   const [prompt, setPrompt] = useState('');
   const [generatedCode, setGeneratedCode] = useState<GeneratedCode>({ html: '', css: '', js: '' });
   const [isGenerating, setIsGenerating] = useState(false);
@@ -66,6 +69,11 @@ const CodeGenerator: React.FC<CodeGeneratorProps> = ({ onClose }) => {
 const scrollContainerRef = useRef<HTMLDivElement>(null);
 const generatedSectionRef = useRef<HTMLDivElement>(null);
 
+useImperativeHandle(ref, () => ({
+  toggleHistory: () => {
+    setShowChatHistory(prev => !prev);
+  }
+}));
 
 const PEXELS_API_KEY = "XvWmsM8koeEX2GHcetS2lCjkzM4O7QPuJ65KVuVj9PkOBOjC3W5EeXpK";
 const fetchPexelsImage = async (query: string): Promise<string> => {
@@ -688,4 +696,6 @@ ${js}
   );
 };
 
-export default CodeGenerator;
+export default CodeGenerator as React.ForwardRefExoticComponent<
+  CodeGeneratorProps & React.RefAttributes<CodeGeneratorRef>
+>;
