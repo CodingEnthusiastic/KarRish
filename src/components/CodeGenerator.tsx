@@ -693,9 +693,9 @@ ${js}
         )}
       </div>
     </section>
-  );
-};
-);
+    );
+    });
+
 
 const ForwardedCodeGenerator = CodeGenerator as React.ForwardRefExoticComponent<
   CodeGeneratorProps & React.RefAttributes<CodeGeneratorRef>
