@@ -120,12 +120,13 @@ function App() {
 
   const testimonials = [
     {
-      name: "Elon Musk",
-      role: "Marketing Director",
-      company: "KarRish",
-      content: "KarRish transformed our web presence overnight. The AI understood our brand perfectly and created a website that exceeded our expectations.",
-      rating: 5
-    },
+    name: "Santosh Shenoy",
+    role: "Software Engineer",
+    company: "Uber",
+    content:
+      "KarRish delivers fast, clean, and scalable code. It’s like having an expert dev team working in the background.",
+    rating: 5
+  },
     {
       name: "Rohit Negi",
       role: "All-Rounder",
@@ -134,12 +135,13 @@ function App() {
       rating: 5
     },
     {
-      name: "Narendra Modi",
-      role: "Prime Minister",
-      company: "Indian PM",
-      content: "We launched our startup website in under 10 minutes. The ROI has been incredible, and our conversion rates have tripled.",
-      rating: 5
-    }
+    name: "Sagar Shah",
+    role: "Founder",
+    company: "ChessBase India",
+    content:
+      "KarRish helped us showcase our chess ecosystem beautifully. The UI is intuitive, and everything just works.",
+    rating: 5
+  }
   ];
 
   const howItWorksSlides = [
