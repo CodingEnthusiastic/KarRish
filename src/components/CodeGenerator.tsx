@@ -427,7 +427,7 @@ ${js}
                 // If currently hidden, show it. If shown, toggle off.
                 return !prev;
               })}
-              className="flex items-center space-x-2 bg-red-500/10 backdrop-blur-sm text-white px-4 py-2 rounded-xl hover:bg-red-500/20 transition-all duration-300"
+              className="flex items-center space-x-2 bg-red-500 backdrop-blur-sm text-white px-4 py-2 rounded-xl hover:bg-red-500/20 transition-all duration-300"
             >
               <History className="w-5 h-5" />
               <span>History ({chatSessions.length})</span>
