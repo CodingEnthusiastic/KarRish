@@ -385,7 +385,9 @@ function App() {
               >
                 {howItWorksSlides.map((slide) => (
                   <div key={slide.id} className="w-full flex-shrink-0">
-                    <div className="relative h-96 rounded-2xl overflow-hidden">
+{/*                     <div className="relative h-96 rounded-2xl overflow-hidden"> */}
+                        <div className="relative w-full rounded-2xl overflow-hidden">
+
                       {/* Icon positioned at top-left */}
                       <div className="absolute top-6 left-6 z-10">
                         <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg">
@@ -395,7 +397,7 @@ function App() {
                       <img
                         src={slide.image}
                         alt={slide.title}
-                        className="w-full h-full object-cover"
+                        className="w-full h-auto object-contain"
                       />
                     </div>
                   </div>
