@@ -449,7 +449,9 @@ function App() {
             </button>
 
             {/* Dots Indicator */}
-            <div className="flex justify-center space-x-2 mt-8">
+{/*             <div className="flex justify-center space-x-2 mt-8"> */}
+              <div className="flex justify-center space-x-2 mt-3 mb-4">
+
               {howItWorksSlides.map((_, index) => (
                 <button
                   key={index}
