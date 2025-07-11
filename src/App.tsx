@@ -82,7 +82,8 @@ function App() {
         "SSL certificate included",
         "24/7 support"
       ],
-      isPopular: false
+      isPopular: false,
+      
     },
     {
       name: "Professional",
@@ -125,14 +126,16 @@ function App() {
     company: "Uber",
     content:
       "KarRish delivers fast, clean, and scalable code. It’s like having an expert dev team working in the background.",
-    rating: 5
+    rating: 5,
+      imageUrl: "https://media.licdn.com/dms/image/v2/D4D22AQFQBDomCcFHGQ/feedshare-shrink_1280/B4DZXNtkZzHAAk-/0/1742913031155?e=1755129600&v=beta&t=CqXmjSevBMjrGRhzht366xx8HLj2Vf6SHvAdMacAQnk"
   },
     {
       name: "Rohit Negi",
       role: "Founder",
       company: "CoderArmy",
       content: "As a Gen-AI instructor, I was skeptical about AI-generated websites. KarRish proved me wrong with its attention to detail and design quality.",
-      rating: 5
+      rating: 5,
+      imageUrl: "https://yt3.googleusercontent.com/ytc/AIdro_kMl44oPi4fNs0L0DhQxsXWFhMWym0bfH3tagBnNeBkNyc=s900-c-k-c0x00ffffff-no-rj"
     },
     {
     name: "Sagar Shah",
@@ -140,7 +143,8 @@ function App() {
     company: "ChessBase India",
     content:
       "KarRish helped us showcase our chess ecosystem beautifully. The UI is intuitive, and everything just works.",
-    rating: 5
+    rating: 5,
+      imageUrl:"https://www.profileage.com/wp-content/uploads/2024/10/sagar_shah.jpg"
   }
   ];
 
