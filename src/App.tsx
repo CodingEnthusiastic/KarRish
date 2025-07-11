@@ -558,18 +558,26 @@ function App() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {testimonials.map((testimonial, index) => (
-              <div key={index} className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/10">
-                <div className="flex items-center mb-4">
-                  {[...Array(testimonial.rating)].map((_, i) => (
-                    <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
-                  ))}
-                </div>
-                <p className="text-white/80 mb-6 leading-relaxed">"{testimonial.content}"</p>
-                <div>
-                  <div className="font-semibold text-white">{testimonial.name}</div>
-                  <div className="text-white/60">{testimonial.role}, {testimonial.company}</div>
-                </div>
+              <div key={index} className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/10 text-center">
+              <div className="flex justify-center mb-4">
+                <img
+                  src={testimonial.imageUrl}
+                  alt={testimonial.name}
+                  className="w-16 h-16 rounded-full object-cover border-2 border-white/20 shadow-md"
+                />
               </div>
+              <div className="flex justify-center mb-4">
+                {[...Array(testimonial.rating)].map((_, i) => (
+                  <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
+                ))}
+              </div>
+              <p className="text-white/80 mb-6 leading-relaxed">"{testimonial.content}"</p>
+              <div>
+                <div className="font-semibold text-white">{testimonial.name}</div>
+                <div className="text-white/60">{testimonial.role}, {testimonial.company}</div>
+              </div>
+            </div>
+
             ))}
           </div>
         </div>
