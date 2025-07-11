@@ -357,11 +357,12 @@ function App() {
 
       {/* How It Works */}
       {/*         <section id="how-it-works" className="py-20 px-4 sm:px-6 lg:px-8 scale-90 max-w-4xl mx-auto"> */}
-      <section
-        id="how-it-works"
-         className="py-20 px-4 sm:px-6 lg:px-8 flex justify-center"
-      >
-        <div className="w-full sm:w-[95%] lg:w-[85%] xl:w-[80%] max-w-screen-xl transition-all duration-300""> {/* or max-w-screen-lg */}
+          <section
+            id="how-it-works"
+            className="py-20 px-4 sm:px-6 lg:px-8 flex justify-center"
+          >
+            <div className="w-full sm:w-[90%] lg:w-[75%] xl:w-[70%] max-w-screen-lg transition-all duration-300">
+
         
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
