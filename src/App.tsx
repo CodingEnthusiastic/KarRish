@@ -477,12 +477,20 @@ function App() {
             {pricingPlans.map((plan, index) => (
               <div 
                 key={index}
-                className={`relative bg-white/10 backdrop-blur-sm rounded-2xl p-8 border transition-all duration-300 transform hover:-translate-y-2 ${
+                className={`relative bg-white/10 backdrop-blur-sm rounded-2xl p-8 border transition-all duration-300 transform hover:-translate-y-2 hover:shadow-lg hover:shadow-pink-400/30 group ${
                   plan.isPopular 
                     ? 'border-purple-400 ring-2 ring-purple-400/50 scale-105' 
                     : 'border-white/10 hover:border-white/20'
                 }`}
               >
+                {/* Image Box at Bottom Right */}
+                <div className="absolute bottom-3 right-3 w-10 h-10">
+                  <img
+                    src={`https://via.placeholder.com/40?text=${plan.name.charAt(0)}`} // replace with your own URLs
+                    alt={`${plan.name} icon`}
+                    className="rounded-md"
+                  />
+                </div>
                 {plan.isPopular && (
                   <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
                     <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-full text-sm font-semibold">
