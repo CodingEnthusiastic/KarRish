@@ -19,13 +19,18 @@ import {
   Sparkles,
   Timer,
   Users,
-  Trophy
+  ChevronLeft,
+  ChevronRight,
+  Trophy,
+  History,
+  MessageSquare
 } from 'lucide-react';
 
 function App() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [showAIBuilder, setShowAIBuilder] = useState(true);
+  const [currentHowItWorksSlide, setCurrentHowItWorksSlide] = useState(0);
 
   useEffect(() => {
     setIsVisible(true);
@@ -136,6 +141,57 @@ function App() {
       rating: 5
     }
   ];
+
+  const howItWorksSlides = [
+    {
+      id: 1,
+      title: "1. Describe Your Vision",
+      description: "Tell our AI about your business, goals, and preferences in plain English. Our advanced AI understands context and creates exactly what you need.",
+      image: "/screenshots/step1-describe.png",
+      icon: <Timer className="w-8 h-8 text-white" />
+    },
+    {
+      id: 2,
+      title: "2. AI Creates Magic",
+      description: "Watch as our AI generates beautiful, professional website code tailored to your needs. HTML, CSS, and JavaScript created in seconds.",
+      image: "/screenshots/step2-ai-creates.png",
+      icon: <Sparkles className="w-8 h-8 text-white" />
+    },
+    {
+      id: 3,
+      title: "3. Live Preview & Edit",
+      description: "See your website come to life instantly with our live preview. Make changes, test functionality, and perfect your design in real-time.",
+      image: "/screenshots/step3-preview.png",
+      icon: <Play className="w-8 h-8 text-white" />
+    },
+    {
+      id: 4,
+      title: "4. Deploy Instantly",
+      description: "Launch your website to the world with one click. Deploy to Netlify, Vercel, or download your files for any hosting platform.",
+      image: "/screenshots/step4-deploy.png",
+      icon: <Globe className="w-8 h-8 text-white" />
+    },
+    {
+      id: 5,
+      title: "5. Launch & Succeed",
+      description: "Your professional website is now live and ready to convert visitors into customers. Track performance and grow your business online.",
+      image: "/screenshots/step5-success.png",
+      icon: <Trophy className="w-8 h-8 text-white" />
+    }
+  ];
+
+  const nextHowItWorksSlide = () => {
+    setCurrentHowItWorksSlide((prev) => (prev + 1) % howItWorksSlides.length);
+  };
+
+  const prevHowItWorksSlide = () => {
+    setCurrentHowItWorksSlide((prev) => (prev - 1 + howItWorksSlides.length) % howItWorksSlides.length);
+  };
+
+  useEffect(() => {
+    const timer = setInterval(nextHowItWorksSlide, 4000);
+    return () => clearInterval(timer);
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
@@ -276,7 +332,7 @@ function App() {
       </div>
 
       {/* Features Section */}
-      <section id="features" className="py-20 px-4 sm:px-6 lg:px-8 bg-white/5 backdrop-blur-sm">
+      <section id="features" className="py-20 px-4 sm:px-6 lg:px-8 bg-white/5 backdrop-blur-sm overflow-hidden">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
@@ -288,19 +344,23 @@ function App() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {features.map((feature, index) => (
-              <div 
-                key={index}
-                className="group bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/10 hover:bg-white/15 transition-all duration-300 transform hover:-translate-y-2"
-              >
-                <div className="text-purple-400 mb-4 group-hover:text-pink-400 transition-colors">
-                  {feature.icon}
+          {/* Marquee Container */}
+          <div className="marquee-container">
+            <div className="marquee-content">
+              {/* Triple set of cards for proper seamless loop */}
+              {[...features, ...features, ...features].map((feature, index) => (
+                <div 
+                  key={index}
+                  className="marquee-card group bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/10 hover:bg-white/15 transition-all duration-300"
+                >
+                  <div className="text-purple-400 mb-4 group-hover:text-pink-400 transition-colors">
+                    {feature.icon}
+                  </div>
+                  <h3 className="text-xl font-semibold text-white mb-3">{feature.title}</h3>
+                  <p className="text-white/70 leading-relaxed">{feature.description}</p>
                 </div>
-                <h3 className="text-xl font-semibold text-white mb-3">{feature.title}</h3>
-                <p className="text-white/70 leading-relaxed">{feature.description}</p>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -315,29 +375,71 @@ function App() {
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center group">
-              <div className="w-20 h-20 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
-                <Timer className="w-10 h-10 text-white" />
+          {/* Image Carousel - Separated Image and Text */}
+          <div className="relative">
+            {/* Image Section */}
+            <div className="overflow-hidden rounded-2xl mb-8">
+              <div 
+                className="flex transition-transform duration-500 ease-in-out"
+                style={{ transform: `translateX(-${currentHowItWorksSlide * 100}%)` }}
+              >
+                {howItWorksSlides.map((slide) => (
+                  <div key={slide.id} className="w-full flex-shrink-0">
+                    <div className="relative h-96 rounded-2xl overflow-hidden">
+                      {/* Icon positioned at top-left */}
+                      <div className="absolute top-6 left-6 z-10">
+                        <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg">
+                          {slide.icon}
+                        </div>
+                      </div>
+                      <img
+                        src={slide.image}
+                        alt={slide.title}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  </div>
+                ))}
               </div>
-              <h3 className="text-xl font-semibold text-white mb-3">1. Describe Your Vision</h3>
-              <p className="text-white/70">Tell our AI about your business, goals, and preferences in plain English</p>
             </div>
 
-            <div className="text-center group">
-              <div className="w-20 h-20 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
-                <Sparkles className="w-10 h-10 text-white" />
-              </div>
-              <h3 className="text-xl font-semibold text-white mb-3">2. AI Creates Magic</h3>
-              <p className="text-white/70">Watch as our AI generates a beautiful, professional website tailored to your needs</p>
+            {/* Text Section Below Image */}
+            <div className="text-center">
+              <h3 className="text-2xl font-bold text-white mb-4">
+                {howItWorksSlides[currentHowItWorksSlide].title}
+              </h3>
+              <p className="text-white/90 text-lg max-w-2xl mx-auto leading-relaxed">
+                {howItWorksSlides[currentHowItWorksSlide].description}
+              </p>
             </div>
+            {/* Navigation Arrows */}
+            <button
+              onClick={prevHowItWorksSlide}
+              className="absolute left-4 top-48 transform -translate-y-1/2 bg-white/10 backdrop-blur-sm text-white p-3 rounded-full hover:bg-white/20 transition-all duration-300"
+            >
+              <ChevronLeft className="w-6 h-6" />
+            </button>
+            
+            <button
+              onClick={nextHowItWorksSlide}
+              className="absolute right-4 top-48 transform -translate-y-1/2 bg-white/10 backdrop-blur-sm text-white p-3 rounded-full hover:bg-white/20 transition-all duration-300"
+            >
+              <ChevronRight className="w-6 h-6" />
+            </button>
 
-            <div className="text-center group">
-              <div className="w-20 h-20 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
-                <Trophy className="w-10 h-10 text-white" />
-              </div>
-              <h3 className="text-xl font-semibold text-white mb-3">3. Launch & Succeed</h3>
-              <p className="text-white/70">Customize, optimize, and launch your website to start achieving your goals</p>
+            {/* Dots Indicator */}
+            <div className="flex justify-center space-x-2 mt-8">
+              {howItWorksSlides.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentHowItWorksSlide(index)}
+                  className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                    index === currentHowItWorksSlide 
+                      ? 'bg-purple-500 scale-125' 
+                      : 'bg-white/30 hover:bg-white/50'
+                  }`}
+                />
+              ))}
             </div>
           </div>
         </div>
@@ -533,6 +635,19 @@ function App() {
           </div>
         </div>
       </footer>
+
+      {/* Fixed ChatBot Button */}
+      <a 
+        href="https://chatbotindia.netlify.app/"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-6 right-6 bg-gradient-to-r from-green-500 to-emerald-500 text-white px-6 py-3 rounded-full shadow-lg hover:from-green-600 hover:to-emerald-600 transition-all duration-300 transform hover:scale-105 z-50 flex items-center space-x-2"
+      >
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+        </svg>
+        <span className="font-semibold">ChatBot India</span>
+      </a>
     </div>
   );
 }
