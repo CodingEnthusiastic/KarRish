@@ -1,6 +1,7 @@
-
 import React, { useState } from 'react';
-import { Download, ExternalLink, Globe, Loader2, Check } from 'lucide-react';
+import { Download, ExternalLink, Github, Globe, Loader2 } from 'lucide-react';
+import JSZip from 'jszip';
+import { sha1 } from 'js-sha1';
 
 interface DeployButtonProps {
   generatedCode: {
@@ -13,20 +14,15 @@ interface DeployButtonProps {
 
 const DeployButton: React.FC<DeployButtonProps> = ({ generatedCode, projectName = 'my-website' }) => {
   const [isDeploying, setIsDeploying] = useState(false);
-  const [deployUrl, setDeployUrl] = useState<string | null>(null);
 
-  const downloadAndDeployToNetlify = async () => {
-    setIsDeploying(true);
-    setDeployUrl(null);
-
-    try {
-      const fullHTML = `<!DOCTYPE html>
+  const generateFiles = () => {
+    const indexHtml = `<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>${projectName}</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 ${generatedCode.html}
@@ -34,64 +30,113 @@ ${generatedCode.html}
 </body>
 </html>`;
 
-        const files = {
-        'index.html': fullHTML,
-        'style.css': generatedCode.css,
-        'script.js': generatedCode.js,
-        'README.md': `# ${projectName}
+    return {
+      'index.html': indexHtml,
+      'style.css': generatedCode.css,
+      'script.js': generatedCode.js,
+    };
+  };
 
-          This website was generated using KarRish AI Website Builder.
-          
-          ## Files
-          - \`index.html\` - Main HTML file
-          - \`style.css\` - Stylesheet
-          - \`script.js\` - JavaScript functionality
-          
-          ## Deployment
-          You can deploy this website to any hosting platform:
-          1. Upload all files to your hosting provider
-          2. Or drag and drop the entire folder to Netlify
-          3. Or push to GitHub and connect to Vercel
-          
-          ## Quick Deploy to Netlify
-          1. Go to [Netlify](https://netlify.com)
-          2. Drag and drop this folder to the deploy area
-          3. Your website will be live in seconds!
-`
-      
-      };
+  const downloadAsZip = async () => {
+    setIsDeploying(true);
+    const files = generateFiles();
+    const zip = new JSZip();
 
-      const JSZip = (await import('jszip')).default;
-      const zip = new JSZip();
-      Object.entries(files).forEach(([filename, content]) => {
-        zip.file(filename, content);
+    for (const [filename, content] of Object.entries(files)) {
+      zip.file(filename, content);
+    }
+
+    const blob = await zip.generateAsync({ type: 'blob' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${projectName}.zip`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    setIsDeploying(false);
+
+    // Optional: open Netlify drag-drop page
+    setTimeout(() => {
+      window.open('https://app.netlify.com/drop', '_blank');
+    }, 1000);
+  };
+
+  const deployToNetlify = async () => {
+    const files = generateFiles();
+    const token = import.meta.env.VITE_NETLIFY_DEPLOY_KEY;
+    if (!token) {
+      alert("Missing Netlify Deploy Key in environment");
+      return;
+    }
+
+    try {
+      setIsDeploying(true);
+
+      const fileEntries = Object.entries(files).map(([path, content]) => ({
+        path,
+        content: new TextEncoder().encode(content),
+        sha: sha1(content),
+      }));
+
+      const deployFilesMap: Record<string, string> = {};
+      fileEntries.forEach(file => {
+        deployFilesMap[file.path] = file.sha;
       });
 
-      const blob = await zip.generateAsync({ type: 'blob' });
-
-      const formData = new FormData();
-      formData.append('file', blob, `${projectName}.zip`);
-
-      const response = await fetch('https://api.netlify.com/api/v1/sites', {
+      // 1. Create deploy
+      const deployRes = await fetch('https://api.netlify.com/api/v1/sites', {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${import.meta.env.VITE_NETLIFY_TOKEN}`,
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
         },
-        body: formData,
+        body: JSON.stringify({ name: `karrish-${Date.now()}` }),
       });
+      const siteData = await deployRes.json();
 
-      if (!response.ok) {
-        throw new Error('Netlify deployment failed');
-      }
+      const deployCreateRes = await fetch(`https://api.netlify.com/api/v1/sites/${siteData.id}/deploys`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          files: deployFilesMap,
+        }),
+      });
+      const deployData = await deployCreateRes.json();
 
-      const data = await response.json();
-      setDeployUrl(data.ssl_url || data.url);
+      // 2. Upload files if missing
+      await Promise.all(fileEntries.map(file => {
+        return fetch(`https://api.netlify.com/api/v1/deploys/${deployData.id}/files/${file.path}`, {
+          method: 'PUT',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/octet-stream',
+          },
+          body: file.content,
+        });
+      }));
+
+      // ✅ Done
+      window.open(`https://${siteData.name}.netlify.app`, '_blank');
+
     } catch (err) {
-      console.error('Deployment error:', err);
-      alert('Deployment failed. Check console or API token.');
+      console.error('Deploy error:', err);
+      alert("Deploy failed. Check console for details.");
     } finally {
       setIsDeploying(false);
     }
+  };
+
+  const deployToGitHub = () => {
+    window.open('https://github.com/new', '_blank');
+  };
+
+  const deployToVercel = () => {
+    window.open('https://vercel.com/new', '_blank');
   };
 
   return (
@@ -101,35 +146,65 @@ ${generatedCode.html}
         Deploy Your Website
       </h3>
 
-      <button
-        onClick={downloadAndDeployToNetlify}
-        disabled={isDeploying}
-        className="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white px-6 py-3 rounded-xl font-semibold hover:from-green-600 hover:to-emerald-600 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 flex items-center justify-center"
-      >
-        {isDeploying ? (
-          <>
-            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-            Deploying...
-          </>
-        ) : (
-          <>
-            <Download className="w-5 h-5 mr-2" />
-            Deploy to Netlify
-          </>
-        )}
-      </button>
-
-      {deployUrl && (
-        <a
-          href={deployUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-4 block text-center text-green-400 font-medium hover:underline flex items-center justify-center"
+      <div className="space-y-4">
+        <button
+          onClick={downloadAsZip}
+          disabled={isDeploying}
+          className="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white px-6 py-3 rounded-xl font-semibold hover:from-green-600 hover:to-emerald-600 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
         >
-          <Check className="w-4 h-4 mr-1" />
-          View Live Site
-        </a>
-      )}
+          {isDeploying ? (
+            <>
+              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+              Preparing...
+            </>
+          ) : (
+            <>
+              <Download className="w-5 h-5 mr-2" />
+              Download & Deploy to Netlify
+            </>
+          )}
+        </button>
+
+        <button
+          onClick={deployToNetlify}
+          disabled={isDeploying}
+          className="w-full bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 disabled:opacity-50 flex items-center justify-center"
+        >
+          {isDeploying ? (
+            <>
+              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+              Deploying...
+            </>
+          ) : (
+            <>
+              <ExternalLink className="w-5 h-5 mr-2" />
+              Instant Deploy to Netlify
+            </>
+          )}
+        </button>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <button
+            onClick={deployToGitHub}
+            className="flex items-center justify-center px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors"
+          >
+            <Github className="w-4 h-4 mr-2" />
+            GitHub
+          </button>
+
+          <button
+            onClick={deployToVercel}
+            className="flex items-center justify-center px-4 py-2 bg-black hover:bg-gray-900 text-white rounded-lg transition-colors"
+          >
+            <ExternalLink className="w-4 h-4 mr-2" />
+            Vercel
+          </button>
+        </div>
+
+        <p className="text-white/60 text-sm">
+          Download or deploy your website instantly to your favorite hosting platform.
+        </p>
+      </div>
     </div>
   );
 };
