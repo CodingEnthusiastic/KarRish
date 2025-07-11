@@ -488,13 +488,15 @@ function App() {
                 }`}
               >
                 {/* Image Box at Bottom Right */}
-                <div className="absolute bottom-3 right-3 w-10 h-10">
+                  
+{/*                 <div className="absolute bottom-3 right-3 w-10 h-10">
                   <img
                     src={`https://via.placeholder.com/40?text=${plan.name.charAt(0)}`} // replace with your own URLs
                     alt={`${plan.name} icon`}
                     className="rounded-md"
                   />
-                </div>
+                </div> */}
+                
                 {plan.isPopular && (
                   <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
                     <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-full text-sm font-semibold">
