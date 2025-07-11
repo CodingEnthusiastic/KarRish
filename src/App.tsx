@@ -370,7 +370,7 @@ function App() {
       {/*         <section id="how-it-works" className="py-20 px-4 sm:px-6 lg:px-8 scale-90 max-w-4xl mx-auto"> */}
           <section
             id="how-it-works"
-            className="py-20 px-4 sm:px-6 lg:px-8 flex justify-center"
+            className="py-8 px-4 sm:px-6 lg:px-8 flex justify-center"
             style={{
               height: 'auto',
               ...(window.innerWidth >= 1024 && {
@@ -387,7 +387,7 @@ function App() {
           >
           
                   
-          <div className="text-center mb-16">
+          <div className="text-center mb-8">
             <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
               From Idea to Website in
               <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent"> 3 Simple Steps</span>
@@ -425,7 +425,7 @@ function App() {
             </div>
 
             {/* Text Section Below Image */}
-            <div className="text-center">
+            <div className="text-center mt-6">
               <h3 className="text-2xl font-bold text-white mb-4">
                 {howItWorksSlides[currentHowItWorksSlide].title}
               </h3>
