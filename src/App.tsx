@@ -129,9 +129,9 @@ function App() {
   },
     {
       name: "Rohit Negi",
-      role: "All-Rounder",
+      role: "Founder",
       company: "CoderArmy",
-      content: "As a designer, I was skeptical about AI-generated websites. KarRish proved me wrong with its attention to detail and design quality.",
+      content: "As a Gen-AI instructor, I was skeptical about AI-generated websites. KarRish proved me wrong with its attention to detail and design quality.",
       rating: 5
     },
     {
