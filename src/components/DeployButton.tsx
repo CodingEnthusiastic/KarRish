@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Download, ExternalLink, Github, Globe, Loader2 } from 'lucide-react';
 import JSZip from 'jszip';
-import { sha1 } from 'js-sha1';
+import sha1  from 'js-sha1';
 
 interface DeployButtonProps {
   generatedCode: {
