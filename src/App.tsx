@@ -370,7 +370,7 @@ function App() {
       {/*         <section id="how-it-works" className="py-20 px-4 sm:px-6 lg:px-8 scale-90 max-w-4xl mx-auto"> */}
           <section
             id="how-it-works"
-            className="py-8 px-4 sm:px-6 lg:px-8 flex justify-center"
+            className="py-14 px-4 sm:px-6 lg:px-8 flex justify-center"
             style={{
               height: 'auto',
               ...(window.innerWidth >= 1024 && {
