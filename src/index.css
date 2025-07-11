@@ -1,3 +1,88 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Marquee Animation for Feature Cards */
+.marquee-container {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+/* .marquee-content {
+  display: flex;
+  animation: marquee 15s linear infinite;
+  gap: 2rem;
+} */
+
+.marquee-content {
+  display: flex;
+  animation: marquee 38s linear infinite;
+  gap: 2rem;
+  width: max-content; /* This is crucial */
+}    
+.marquee-card {
+  min-width: 350px;
+  flex-shrink: 0;
+  transition: transform 0.3s ease;
+}
+
+.marquee-card:hover {
+  transform: scale(1.05) !important;
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+
+/* Pause animation on hover */
+.marquee-container:hover .marquee-content {
+  animation-play-state: paused;
+}
+
+/* Carousel Styles */
+.carousel-container {
+  position: relative;
+}
+
+.carousel-track {
+  display: flex;
+}
+
+.carousel-slide {
+  width: 100%;
+  flex-shrink: 0;
+}
+
+/* 3D Cubic Effect */
+.marquee-card {
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .marquee-card {
+    min-width: 280px;
+  }
+  
+  .marquee-content {
+    animation-duration: 12s;
+  }
+}
+
+@media (max-width: 640px) {
+  .marquee-card {
+    min-width: 250px;
+  }
+  
+  .marquee-content {
+    animation-duration: 10s;
+  }
+}
