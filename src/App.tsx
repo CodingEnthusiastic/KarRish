@@ -371,13 +371,7 @@ function App() {
           <section
             id="how-it-works"
             className="py-14 px-4 sm:px-6 lg:px-8 flex justify-center"
-{/*             style={{
-              height: 'auto',
-              ...(window.innerWidth >= 1024 && {
-                transform: 'scale(0.85)',
-                transformOrigin: 'top center',
-              }),
-            }} */}
+
                 style={{
             height: 'auto',
             marginBottom: '-60px',
