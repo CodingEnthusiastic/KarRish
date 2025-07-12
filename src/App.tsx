@@ -382,10 +382,10 @@ function App() {
           }}
 
           >
-{/*             <div className="w-full sm:w-[90%] lg:w-[75%] xl:w-[70%] max-w-screen-lg transition-all duration-300"> */}
+{/*             <div className="w-full sm:w-[90%] lg:w-[75%] xl:w-[70%] max-w-screen-lg transition-all duration-3000"> */}
           <div
             className={`w-full sm:w-[90%] lg:w-[75%] xl:w-[70%] max-w-screen-lg transition-all ${
-              window.innerWidth < 1150 ? 'duration-[3500ms]' : 'duration-300'
+              window.innerWidth < 1150 ? 'duration-[3500ms]' : 'duration-3000'
             }`}
           >
           
