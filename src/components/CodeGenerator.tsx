@@ -181,7 +181,7 @@ Rules:
 7. Ensure cross-browser compatibility
 8. Use only the following image in your output: ${imageURL}
 9. Only use standard Font Awesome CDN. Do NOT generate or repeat integrity values manually.
-
+10. When you generate text , make sure you keep background color and text color different so that user will read the text easily.
 
 Format your response EXACTLY like this:
 HTML:
