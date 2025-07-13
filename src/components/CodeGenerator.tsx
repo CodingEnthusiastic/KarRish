@@ -522,7 +522,7 @@ ${js}
       <div className="flex items-center space-x-2">
         <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
         <span className="text-white font-semibold">
-          AI is generating your code...
+          AI is generating your code... Wait for some time ( ~ 2 mins )
         </span>
       </div>
     </div>
