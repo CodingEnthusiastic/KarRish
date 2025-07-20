@@ -167,7 +167,7 @@ const generateCode = async () => {
     const imageURL = await fetchPexelsImage(prompt);
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
     const systemPrompt = `You are an expert web developer. Generate clean, modern, and functional HTML, CSS, and JavaScript code based on the user's request.
 
@@ -182,7 +182,7 @@ Rules:
 8. Use only the following image in your output: ${imageURL}
 9. Only use standard Font Awesome CDN. Do NOT generate or repeat integrity values manually.
 10. When you generate text , make sure you keep background color and text color different so that user will read the text easily.
-
+11. While creating any application , give html css js in detail with all aspects covered..
 Format your response EXACTLY like this:
 HTML:
 \`\`\`html
